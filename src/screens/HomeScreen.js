@@ -1,9 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import mqtt from 'mqtt';
 
 const HomeScreen = ({ navigation, contacts, setContacts }) => {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+    const [recognizedName, setRecognizedName] = useState('');
+
+    useEffect(() => {
+        console.log('Attempting to connect to MQTT broker...');
+        const client = mqtt.connect('wss://broker.hivemq.com:8000/mqtt');
+
+        client.on('connect', () => {
+            console.log('Connected to MQTT broker');
+            client.subscribe('face_recognition/names', (err) => {
+                if (!err) {
+                    console.log('Subscribed to topic: face_recognition/names');
+                } else {
+                    console.error('Subscription error:', err);
+                }
+            });
+        });
+
+        client.on('message', (topic, message) => {
+            if (topic === 'face_recognition/names') {
+                console.log('Message received on topic:', topic, 'Message:', message.toString());
+                setRecognizedName(message.toString());
+            }
+        });
+
+        client.on('error', (error) => {
+            console.error('MQTT Client Error:', error);
+        });
+
+        client.on('offline', () => {
+            console.warn('MQTT Client is offline');
+        });
+
+        client.on('close', () => {
+            console.warn('MQTT Client is closed');
+        });
+
+        return () => {
+            client.end();
+        };
+    }, []);
 
     const addContact = () => {
         if (name && phone) {
@@ -44,6 +85,9 @@ const HomeScreen = ({ navigation, contacts, setContacts }) => {
                 keyExtractor={item => item.id}
                 style={styles.list}
             />
+            {recognizedName ? (
+                <Text style={styles.recognizedText}>Recognized: {recognizedName}</Text>
+            ) : null}
         </View>
     );
 };
@@ -77,6 +121,12 @@ const styles = StyleSheet.create({
     },
     contactText: {
         fontSize: 18,
+    },
+    recognizedText: {
+        fontSize: 20,
+        color: 'red',
+        marginTop: 20,
+        textAlign: 'center',
     },
 });
 
