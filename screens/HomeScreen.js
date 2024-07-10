@@ -4,19 +4,25 @@ import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity }
 const HomeScreen = ({ navigation, contacts, setContacts }) => {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
+    const [profession, setProfession] = useState('');
+    const [details, setDetails] = useState('');
 
     const addContact = () => {
         if (name && phone) {
-            setContacts([...contacts, { id: contacts.length.toString(), name, phone, additionalInfo: '' }]);
+            setContacts([...contacts, { id: contacts.length.toString(), name, phone, email, profession, details }]);
             setName('');
             setPhone('');
+            setEmail('');
+            setProfession('');
+            setDetails('');
         }
     };
 
     const renderItem = ({ item }) => (
         <TouchableOpacity onPress={() => navigation.navigate('Details', { contactId: item.id })}>
             <View style={styles.contactItem}>
-                <Text style={styles.contactText}>{item.name} - {item.phone}</Text>
+                <Text style={styles.contactText}>{item.name} - {item.profession}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -37,7 +43,27 @@ const HomeScreen = ({ navigation, contacts, setContacts }) => {
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
             />
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Profession"
+                value={profession}
+                onChangeText={setProfession}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Additional Details"
+                value={details}
+                onChangeText={setDetails}
+            />
+            
             <Button title="Add Contact" onPress={addContact} />
+
             <FlatList
                 data={contacts}
                 renderItem={renderItem}
