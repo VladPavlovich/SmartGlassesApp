@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
 
 const HomeScreen = ({ navigation, contacts, setContacts }) => {
     const [name, setName] = useState('');
@@ -16,6 +16,7 @@ const HomeScreen = ({ navigation, contacts, setContacts }) => {
             setEmail('');
             setProfession('');
             setDetails('');
+            Keyboard.dismiss();
         }
     };
 
@@ -30,6 +31,15 @@ const HomeScreen = ({ navigation, contacts, setContacts }) => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Contact List</Text>
+
+            <FlatList
+                data={contacts}
+                renderItem={renderItem}
+                keyExtractor={item => item.id}
+                style={styles.list}
+            />
+
+        <View style={styles.form}>
             <TextInput
                 style={styles.input}
                 placeholder="Name"
@@ -56,20 +66,22 @@ const HomeScreen = ({ navigation, contacts, setContacts }) => {
                 onChangeText={setProfession}
             />
             <TextInput
+                multiline
+                numberOfLines={2}
                 style={styles.input}
                 placeholder="Additional Details"
                 value={details}
                 onChangeText={setDetails}
+                keyboardType="text"
             />
-            
-            <Button title="Add Contact" onPress={addContact} />
 
-            <FlatList
-                data={contacts}
-                renderItem={renderItem}
-                keyExtractor={item => item.id}
-                style={styles.list}
-            />
+            <Button 
+            style={styles.form}
+            color='#991818'
+            title="Add New Contact" 
+            onPress={addContact} />
+            </View>
+
         </View>
     );
 };
@@ -78,12 +90,20 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#c9d1d3',
+    },
+    form:{
+        borderWidth: 5,
+        borderColor: '#9dd3df', 
+        backgroundColor: '#9dd3df',
+        marginTop: 20,
+        padding: 5,
     },
     title: {
-        fontSize: 24,
+        fontSize: 32,
         fontWeight: 'bold',
         marginBottom: 20,
+        textAlign: 'center',
     },
     input: {
         height: 40,
@@ -94,7 +114,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     list: {
-        marginTop: 20,
+        // marginTop: 20,
+        borderColor: '#9dd3df',
+        borderWidth: 10,
+        backgroundColor: '#f7f7f7',
     },
     contactItem: {
         padding: 10,

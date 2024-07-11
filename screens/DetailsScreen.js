@@ -7,7 +7,7 @@ const DetailsScreen = ({ route, navigation, contacts, setContacts }) => {
     const [additionalInfo, setAdditionalInfo] = useState(contact ? contact.additionalInfo : '');
 
     useEffect(() => {
-        navigation.setOptions({ title: contact ? contact.name : 'Details' });
+        navigation.setOptions({ title: 'Home' });
     }, [navigation, contact]);
 
 
@@ -29,7 +29,10 @@ const DetailsScreen = ({ route, navigation, contacts, setContacts }) => {
             <Text style={styles.label}>Details: {contact.details}</Text>
 
 
-            <Button title="Edit Contact" onPress={()=>navigation.navigate("Edit Contact", { contactId: contact.id })} />
+            <Button 
+            color='#9dd3df'
+            title="Edit Contact" 
+            onPress={()=>navigation.navigate("Edit Contact", { contactId: contact.id })} />
 
             {/* <TextInput
                 style={styles.input}
