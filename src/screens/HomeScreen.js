@@ -12,55 +12,77 @@ const HomeScreen = ({ navigation, contacts, setContacts }) => {
     const [profession, setProfession] = useState('');
     const [details, setDetails] = useState('');
 
-    const fetchContacts = async () => {
-        const names = await getNames();
-        const fetchedContacts = [];
+    useEffect(() => {
+        fetchContacts();
+    }, []);
 
-        for (const name of names.recognized_names) {
-            const contact = await getContactByName(name);
-            if (contact) {
-                fetchedContacts.push(contact);
-            } else {
-                // Create new contact if not found
-                const newContact = { name, phone: '', email: '', profession: '', details: '' };
-                const id = await addContact(newContact);
-                if (id) {
-                    fetchedContacts.push({ id, ...newContact });
+    const fetchContacts = async () => {
+        try {
+            const names = await getNames();
+            console.log("Fetched names:", names);
+
+            const fetchedContacts = [];
+            for (const name of names.recognized_names) {
+                const contact = await getContactByName(name);
+                if (contact) {
+                    fetchedContacts.push(contact);
+                } else {
+                    // Create new contact if not found
+                    const newContact = { name, phone: '', email: '', profession: '', details: '' };
+                    const id = await addContact(newContact);
+                    if (id) {
+                        fetchedContacts.push({ id, ...newContact });
+                    }
                 }
             }
-        }
 
-        setContacts(fetchedContacts);
+            setContacts(fetchedContacts);
+        } catch (error) {
+            console.error('Error fetching contacts:', error);
+            Alert.alert('Error', 'An error occurred while fetching contacts.');
+        }
     };
 
     const scanForLatestName = async () => {
-        const names = await getNames();
-        if (names.recognized_names.length > 0) {
-            const latestName = names.recognized_names[0];
-            const contact = await getContactByName(latestName);
-            if (contact) {
-                navigation.navigate('Details', { contactId: contact.id });
+        try {
+            const names = await getNames();
+            if (names.recognized_names.length > 0) {
+                const latestName = names.recognized_names[0];
+                const contact = await getContactByName(latestName);
+                if (contact) {
+                    navigation.navigate('Details', { contactId: contact.id });
+                } else {
+                    navigation.navigate('Edit Contact', { contactId: null, name: latestName });
+                }
             } else {
-                navigation.navigate('Edit Contact', { contactId: null, name: latestName });
+                Alert.alert("No names found", "No names were identified by the API.");
             }
-        } else {
-            Alert.alert("No names found", "No names were identified by the API.");
+        } catch (error) {
+            console.error('Error scanning for latest name:', error);
+            Alert.alert('Error', 'An error occurred while scanning for the latest name.');
         }
     };
 
     const addNewContact = async () => {
         if (name && phone) {
-            const newContact = { name, phone, email, profession, details };
-            const id = await addContact(newContact);
-            if (id) {
-                setContacts([...contacts, { id, ...newContact }]);
-                setName('');
-                setPhone('');
-                setEmail('');
-                setProfession('');
-                setDetails('');
-                Keyboard.dismiss();
+            try {
+                const newContact = { name, phone, email, profession, details };
+                const id = await addContact(newContact);
+                if (id) {
+                    setContacts([...contacts, { id, ...newContact }]);
+                    setName('');
+                    setPhone('');
+                    setEmail('');
+                    setProfession('');
+                    setDetails('');
+                    Keyboard.dismiss();
+                }
+            } catch (error) {
+                console.error('Error adding new contact:', error);
+                Alert.alert('Error', 'An error occurred while adding a new contact.');
             }
+        } else {
+            Alert.alert('Validation Error', 'Name and phone are required fields.');
         }
     };
 
@@ -77,14 +99,14 @@ const HomeScreen = ({ navigation, contacts, setContacts }) => {
             <Text style={styles.title}>Contact List</Text>
 
             <Button
-                title="Identify"
+                title="Scan for Latest Name"
                 onPress={scanForLatestName}
             />
 
             <FlatList
-                data={contacts}
+                data={contacts || []}
                 renderItem={renderItem}
-                keyExtractor={item => item.id.toString()}
+                keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()}
                 style={styles.list}
             />
 
