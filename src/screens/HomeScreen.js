@@ -103,12 +103,14 @@ const HomeScreen = ({ navigation, contacts, setContacts }) => {
                 onPress={scanForLatestName}
             />
 
+            { (contacts.length > 0) ? 
             <FlatList
                 data={contacts || []}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()}
                 style={styles.list}
             />
+            : <FlatList data="no contacts yet..." style={styles.list}/>}
 
             <View style={styles.form}>
                 <TextInput
